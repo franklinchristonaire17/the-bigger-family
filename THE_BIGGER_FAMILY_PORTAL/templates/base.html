@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}The Bigger Family Portal{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        family: {
+                            50: '#F5F7FB',
+                            100: '#E8ECF7',
+                            500: '#2563EB',
+                            600: '#1D4ED8',
+                            700: '#1E40AF',
+                            800: '#1E3A8A',
+                            900: '#0F172A',
+                            gold: '#D97706',
+                            goldlight: '#FEF3C7',
+                            emerald: '#059669',
+                            purple: '#7C3AED'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Outfit', sans-serif;
+        }
+        .kente-pattern {
+            background-color: #1e3a8a;
+            background-image: radial-gradient(#d97706 0.75px, transparent 0.75px), radial-gradient(#059669 0.75px, #1e3a8a 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+        .badge-pulse {
+            animation: pulse-ring 2s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen antialiased">
+
+    <!-- Top Announcement Bar (if upcoming meeting or urgent dues) -->
+    <div class="bg-gradient-to-r from-amber-600 via-amber-700 to-yellow-600 text-amber-50 text-xs sm:text-sm font-medium py-1.5 px-4 text-center flex items-center justify-center gap-2 shadow-inner">
+        <i data-lucide="bell" class="w-4 h-4"></i>
+        <span><strong>The Bigger Family Portal:</strong> Headquarters: Adabraka Family House ("Ataa shi ɛfolo") • Branches: Adabraka, Abossey Okai, Ofankor • Meetings Every 2 Weeks • Dues: GH₵ 50.00</span>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand / Logo -->
+                <div class="flex items-center gap-3">
+                    <a href="{{ url_for('dashboard' if g.member else 'index') }}" class="flex items-center gap-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-900 to-amber-600 flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:scale-105 transition-transform">
+                            B
+                        </div>
+                        <div>
+                            <span class="font-heading font-extrabold text-xl text-blue-950 tracking-tight block leading-none">THE BIGGER FAMILY</span>
+                            <span class="text-[11px] font-semibold text-amber-700 tracking-wider uppercase">Portal & Lineage</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                {% if g.member %}
+                <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                    <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-lg text-sm font-semibold {{ 'text-blue-700 bg-blue-50' if request.endpoint == 'dashboard' else 'text-slate-600 hover:text-blue-900 hover:bg-slate-100' }} transition flex items-center gap-1.5">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('family_tree') }}" class="px-3 py-2 rounded-lg text-sm font-semibold {{ 'text-blue-700 bg-blue-50' if 'family_tree' in request.endpoint or 'branch' in request.endpoint else 'text-slate-600 hover:text-blue-900 hover:bg-slate-100' }} transition flex items-center gap-1.5">
+                        <i data-lucide="git-fork" class="w-4 h-4"></i>
+                        <span>Family Tree & Branches</span>
+                    </a>
+                    <a href="{{ url_for('dues') }}" class="px-3 py-2 rounded-lg text-sm font-semibold {{ 'text-blue-700 bg-blue-50' if 'dues' in request.endpoint else 'text-slate-600 hover:text-blue-900 hover:bg-slate-100' }} transition flex items-center gap-1.5">
+                        <i data-lucide="wallet" class="w-4 h-4"></i>
+                        <span>Monthly Dues (GH₵)</span>
+                    </a>
+                    <a href="{{ url_for('meetings') }}" class="px-3 py-2 rounded-lg text-sm font-semibold {{ 'text-blue-700 bg-blue-50' if 'meeting' in request.endpoint else 'text-slate-600 hover:text-blue-900 hover:bg-slate-100' }} transition flex items-center gap-1.5">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                        <span>Bi-Weekly Meetings</span>
+                    </a>
+                    {% if g.member.role in ['admin', 'branch_leader'] %}
+                    <a href="{{ url_for('admin_panel') }}" class="px-3 py-2 rounded-lg text-sm font-semibold {{ 'text-purple-700 bg-purple-50' if 'admin' in request.endpoint else 'text-slate-600 hover:text-purple-900 hover:bg-purple-50' }} transition flex items-center gap-1.5">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span>Admin</span>
+                    </a>
+                    {% endif %}
+                </nav>
+                {% endif %}
+
+                <!-- Right Action / User Profile -->
+                <div class="flex items-center gap-3">
+                    {% if g.member %}
+                    <!-- In-App Notification Bell -->
+                    <a href="{{ url_for('notifications') }}" class="relative p-2 rounded-xl text-slate-600 hover:text-blue-900 hover:bg-slate-100 transition" title="In-App Notifications">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        {% if g.unread_notif_count > 0 %}
+                        <span class="absolute top-1 right-1 flex h-4 w-4">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-4 w-4 bg-red-600 text-white text-[10px] font-bold items-center justify-center leading-none">
+                                {{ g.unread_notif_count }}
+                            </span>
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- Member Badge & Menu -->
+                    <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+                        <a href="{{ url_for('profile') }}" class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 transition group">
+                            <div class="w-8 h-8 rounded-full bg-blue-900 text-amber-300 font-bold flex items-center justify-center text-sm shadow-sm border border-amber-400">
+                                {{ g.member.full_name[0] }}
+                            </div>
+                            <div class="hidden lg:block text-left">
+                                <span class="text-xs font-bold text-slate-900 block leading-tight group-hover:text-blue-700 transition">{{ g.member.full_name }}</span>
+                                <span class="text-[10px] font-medium text-slate-500 block leading-none">{{ g.member.branch_name }} • Age {{ g.member.age }}</span>
+                            </div>
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="p-2 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition" title="Log Out">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                    {% else %}
+                    <!-- Public Auth Buttons -->
+                    <a href="{{ url_for('login') }}" class="text-sm font-semibold text-blue-950 hover:text-blue-700 px-3 py-2 rounded-lg transition">Log In</a>
+                    <a href="{{ url_for('register') }}" class="inline-flex items-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white font-semibold text-sm px-4 py-2 rounded-xl shadow hover:shadow-md transition">
+                        <span>Register (16+)</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                    {% endif %}
+
+                    <!-- Mobile Menu Button -->
+                    <button type="button" id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Navigation -->
+        {% if g.member %}
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
+            <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-800">Dashboard</a>
+            <a href="{{ url_for('family_tree') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-800">Family Tree & Branches</a>
+            <a href="{{ url_for('dues') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-800">Monthly Dues (GH₵)</a>
+            <a href="{{ url_for('meetings') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-800">Bi-Weekly Meetings</a>
+            <a href="{{ url_for('notifications') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-800">Notifications ({{ g.unread_notif_count }})</a>
+            <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-800">My Profile</a>
+            {% if g.member.role in ['admin', 'branch_leader'] %}
+            <a href="{{ url_for('admin_panel') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:bg-purple-50">Admin Console</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50">Log Out</a>
+        </div>
+        {% endif %}
+    </header>
+
+    <!-- Flash Messages Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="flex items-center gap-3 p-3.5 rounded-xl border text-sm font-medium shadow-sm transition
+                            {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-900
+                            {% elif category == 'danger' %} bg-rose-50 border-rose-200 text-rose-900
+                            {% elif category == 'warning' %} bg-amber-50 border-amber-200 text-amber-900
+                            {% else %} bg-blue-50 border-blue-200 text-blue-900 {% endif %}">
+                            <i data-lucide="{% if category == 'success' %}check-circle{% elif category == 'danger' %}alert-octagon{% elif category == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5 flex-shrink-0"></i>
+                            <div class="flex-1">{{ message }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Page Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-blue-950 text-slate-300 border-t border-blue-900 mt-16 pt-10 pb-8 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500 text-blue-950 font-bold flex items-center justify-center font-heading text-lg">B</div>
+                        <span class="font-heading font-bold text-lg text-white">THE BIGGER FAMILY</span>
+                    </div>
+                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-md">
+                        Uniting all branches of the Bigger family lineage worldwide. Preserving our heritage, supporting our youth, fostering welfare through monthly dues, and maintaining bi-weekly assemblies.
+                    </p>
+                    <div class="mt-3 text-xs text-amber-400 font-medium">
+                        Motto: <em>"In Unity, Strength; In Heritage, Progress."</em>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-heading font-semibold text-white mb-3 text-sm uppercase tracking-wider">Quick Links</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="{{ url_for('family_tree') }}" class="hover:text-amber-400 transition">Family Tree & Lineage</a></li>
+                        <li><a href="{{ url_for('meetings') }}" class="hover:text-amber-400 transition">Bi-Weekly Assemblies (Every 14 Days)</a></li>
+                        <li><a href="{{ url_for('dues') }}" class="hover:text-amber-400 transition">Monthly Welfare Dues (GH₵ 50.00)</a></li>
+                        <li><a href="{{ url_for('notifications') }}" class="hover:text-amber-400 transition">In-App Alert Notifications</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-heading font-semibold text-white mb-3 text-sm uppercase tracking-wider">Headquarters & Welfare</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                        <strong>Headquarters:</strong> Adabraka Family House, Accra ("Ataa shi ɛfolo")<br>
+                        <strong>Branches:</strong> Adabraka • Abossey Okai • Ofankor<br>
+                        <strong>Official MoMo:</strong> 024 456 7890 (The Bigger Family Welfare)
+                    </p>
+                    <span class="inline-block px-2.5 py-1 rounded bg-blue-900 text-amber-400 text-[11px] font-semibold border border-blue-800">
+                        Registry Rule: Ages 16+ Only
+                    </span>
+                </div>
+            </div>
+
+            <div class="border-t border-blue-900/60 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400">
+                <p>&copy; {{ current_year }} The Bigger Family Portal. All rights reserved.</p>
+                <p class="mt-2 sm:mt-0 text-slate-400">Designed with pride for the Bigger family lineage</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Init Lucide Icons & Mobile Menu -->
+    <script>
+        lucide.createIcons();
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (toggleBtn && mobileMenu) {
+            toggleBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

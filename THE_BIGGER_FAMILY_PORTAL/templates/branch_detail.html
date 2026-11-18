@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ branch.name }} | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-slate-500">
+        <a href="{{ url_for('family_tree') }}" class="hover:text-blue-700 flex items-center gap-1">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Back to Family Tree</span>
+        </a>
+        <span>/</span>
+        <span class="font-bold text-slate-800">{{ branch.name }}</span>
+    </div>
+
+    <!-- Branch Banner -->
+    <div class="rounded-3xl bg-gradient-to-r from-blue-950 to-slate-900 text-white p-6 sm:p-8 shadow-xl border border-blue-900">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-3.5 h-3.5 rounded-full" style="background-color: {{ branch.color_code }};"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Family Branch #{{ branch.id }}</span>
+                </div>
+                <h1 class="font-heading text-2xl sm:text-4xl font-extrabold text-white mb-2">{{ branch.name }}</h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">{{ branch.description }}</p>
+                <div class="mt-4 flex items-center gap-2 text-xs text-amber-300 font-semibold">
+                    <i data-lucide="award" class="w-4 h-4"></i>
+                    <span>Branch Head / Representative: {{ branch.leader_name or 'Elders Committee' }}</span>
+                </div>
+            </div>
+
+            <!-- Branch Dues Stats -->
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center min-w-[200px]">
+                <span class="text-xs text-slate-300 block mb-1">Current Month Dues</span>
+                <span class="text-2xl font-extrabold text-amber-400 block font-heading">
+                    GH₵ {{ "%.2f"|format(dues_stats.total_collected or 0.0) }}
+                </span>
+                <span class="text-[11px] text-slate-300 block mt-1">
+                    {{ dues_stats.paid_count or 0 }} of {{ members|length }} Paid ({{ curr_period }})
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Roster (Aged 16+) -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-heading text-xl font-bold text-slate-900">Members of this Branch ({{ members|length }})</h2>
+            <span class="text-xs text-slate-500">All members aged 16 and above</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for m in members %}
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl text-white font-bold flex items-center justify-center text-sm shadow" style="background-color: {{ branch.color_code }};">
+                            {{ m.full_name[0] }}
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-bold text-sm text-slate-900">{{ m.full_name }}</h3>
+                            <span class="text-[11px] text-slate-500 block">{{ m.occupation or 'Family Member' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            Age {{ m.age }} (16+)
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 uppercase">
+                            {{ m.role }}
+                        </span>
+                    </div>
+
+                    <div class="text-xs text-slate-600 space-y-1">
+                        {% if m.parent_name %}
+                        <div>Parent: <strong>{{ m.parent_name }}</strong></div>
+                        {% endif %}
+                        <div>Location: <strong>{{ m.residence or 'Ghana' }}</strong></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                    <span>{{ m.gender }}</span>
+                    <a href="tel:{{ m.phone }}" class="text-blue-700 font-bold hover:underline flex items-center gap-1">
+                        <i data-lucide="phone" class="w-3 h-3"></i>
+                        <span>Call</span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

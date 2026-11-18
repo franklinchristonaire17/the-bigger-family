@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}In-App Notifications Hub | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold mb-1">
+                <i data-lucide="bell" class="w-3.5 h-3.5"></i>
+                <span>Member Notification Feed</span>
+            </div>
+            <h1 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900">In-App Notifications</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Stay updated with bi-weekly meeting notices, monthly dues reminders, and branch news.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            {% if g.member.role in ['admin', 'branch_leader'] %}
+            <button type="button" onclick="document.getElementById('broadcast-modal').classList.remove('hidden')" class="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                <i data-lucide="megaphone" class="w-4 h-4"></i>
+                <span>Broadcast Alert</span>
+            </button>
+            {% endif %}
+
+            <form action="{{ url_for('mark_all_notifications_read') }}" method="POST">
+                <button type="submit" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition flex items-center gap-1.5">
+                    <i data-lucide="check-check" class="w-4 h-4"></i>
+                    <span>Mark All Read</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2">
+        <a href="{{ url_for('notifications') }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ 'bg-blue-900 text-white shadow' if not active_category else 'bg-white text-slate-700 border border-slate-200' }}">
+            All Notifications
+        </a>
+        <a href="{{ url_for('notifications', category='meeting') }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ 'bg-blue-900 text-white shadow' if active_category == 'meeting' else 'bg-white text-slate-700 border border-slate-200' }} flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-600"></i>
+            <span>Meetings (Every 14 Days)</span>
+        </a>
+        <a href="{{ url_for('notifications', category='dues') }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ 'bg-blue-900 text-white shadow' if active_category == 'dues' else 'bg-white text-slate-700 border border-slate-200' }} flex items-center gap-1.5">
+            <i data-lucide="wallet" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>Monthly Dues</span>
+        </a>
+        <a href="{{ url_for('notifications', category='member') }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ 'bg-blue-900 text-white shadow' if active_category == 'member' else 'bg-white text-slate-700 border border-slate-200' }} flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>New 16+ Members</span>
+        </a>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="space-y-3">
+        {% for n in notifications %}
+        <div class="p-5 rounded-2xl border transition shadow-sm flex items-start gap-4 {{ 'bg-white border-purple-200 ring-1 ring-purple-100' if not n.is_already_read else 'bg-white/80 border-slate-200' }}">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                {% if n.category == 'meeting' %} bg-blue-100 text-blue-700
+                {% elif n.category == 'dues' %} bg-amber-100 text-amber-700
+                {% elif n.category == 'member' %} bg-emerald-100 text-emerald-700
+                {% else %} bg-purple-100 text-purple-700 {% endif %}">
+                <i data-lucide="{% if n.category == 'meeting' %}calendar{% elif n.category == 'dues' %}wallet{% elif n.category == 'member' %}user-check{% else %}bell{% endif %}" class="w-5 h-5"></i>
+            </div>
+
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded
+                                {% if n.category == 'meeting' %} bg-blue-50 text-blue-800
+                                {% elif n.category == 'dues' %} bg-amber-50 text-amber-800
+                                {% elif n.category == 'member' %} bg-emerald-50 text-emerald-800
+                                {% else %} bg-purple-50 text-purple-800 {% endif %}">
+                                {{ n.category }}
+                            </span>
+                            {% if n.priority == 'urgent' %}
+                            <span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Urgent</span>
+                            {% endif %}
+                        </div>
+                        <h3 class="font-heading font-bold text-sm sm:text-base text-slate-900">{{ n.title }}</h3>
+                    </div>
+
+                    {% if not n.is_already_read %}
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> New
+                    </span>
+                    {% endif %}
+                </div>
+
+                <p class="text-xs text-slate-600 mt-2 leading-relaxed whitespace-pre-line">{{ n.message }}</p>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-[11px] text-slate-400">{{ n.created_at[:16] }}</span>
+                    <div class="flex items-center gap-3">
+                        {% if n.action_link %}
+                        <a href="{{ url_for('mark_notification_read', notif_id=n.id) }}" class="font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1">
+                            <span>Open Link</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </a>
+                        {% elif not n.is_already_read %}
+                        <a href="{{ url_for('mark_notification_read', notif_id=n.id) }}" class="text-slate-500 hover:text-slate-800 font-semibold text-[11px]">
+                            Mark as Read
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-3xl p-10 text-center text-slate-400 border border-slate-200">
+            <i data-lucide="bell-off" class="w-12 h-12 mx-auto mb-2 text-slate-300"></i>
+            <p class="text-sm font-semibold text-slate-700">No notifications found.</p>
+            <span class="text-xs text-slate-400">All alerts and notices will appear here.</span>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Admin Broadcast Modal -->
+{% if g.member.role in ['admin', 'branch_leader'] %}
+<div id="broadcast-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+            <h3 class="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
+                <i data-lucide="megaphone" class="w-5 h-5 text-purple-700"></i>
+                <span>Broadcast Alert to All Family Members</span>
+            </h3>
+            <button type="button" onclick="document.getElementById('broadcast-modal').classList.add('hidden')" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('broadcast_notification') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Alert Title</label>
+                <input type="text" name="title" required placeholder="e.g. Important Family Welfare Notice"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Category</label>
+                    <select name="category" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <option value="announcement">Announcement</option>
+                        <option value="meeting">Meeting Alert</option>
+                        <option value="dues">Dues Reminder</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Priority</label>
+                    <select name="priority" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        <option value="normal">Normal</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Message Body</label>
+                <textarea name="message" rows="3" required placeholder="Write the announcement for all members..."
+                    class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Action Link (Optional)</label>
+                <input type="text" name="action_link" placeholder="e.g. /dues or /meetings"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 font-mono">
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2">
+                <button type="button" onclick="document.getElementById('broadcast-modal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-md transition">
+                    Send Broadcast Now
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

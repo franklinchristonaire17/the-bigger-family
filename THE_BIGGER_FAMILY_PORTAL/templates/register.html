@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Register Member (16+) | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-950 p-6 sm:p-8 text-white relative">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-400/30">
+                    Eligibility Requirement
+                </span>
+                <span class="text-xs text-slate-300">Ages 16 and Above Only</span>
+            </div>
+            <h1 class="font-heading text-2xl sm:text-3xl font-extrabold">Family Member Registration</h1>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                Register under your respective branch of The Bigger Family tree to receive bi-weekly meeting alerts and manage monthly welfare dues.
+            </p>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="POST" id="registration-form" class="p-6 sm:p-8 space-y-6">
+            
+            <!-- SECTION 1: Personal & Age Verification -->
+            <div class="space-y-4">
+                <h3 class="font-heading text-sm font-bold uppercase tracking-wider text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="user-check" class="w-4 h-4 text-blue-600"></i>
+                    <span>1. Identity & Age Verification (16+ Rule)</span>
+                </h3>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="full_name">
+                        Full Legal Name <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="full_name" name="full_name" required placeholder="e.g. Kwame Mensah Bigger"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="date_of_birth">
+                            Date of Birth <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="gender">
+                            Gender <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="gender" name="gender" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm bg-white">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Real-Time Age Verification Indicator Banner -->
+                <div id="age-check-badge" class="hidden p-3.5 rounded-xl text-xs font-medium border transition-all">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- SECTION 2: Branch & Lineage Association -->
+            <div class="space-y-4 pt-2">
+                <h3 class="font-heading text-sm font-bold uppercase tracking-wider text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="git-branch" class="w-4 h-4 text-emerald-600"></i>
+                    <span>2. Family Tree Branch & Lineage</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="branch_id">
+                            Family Branch <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="branch_id" name="branch_id" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm bg-white">
+                            <option value="">-- Choose Your Branch --</option>
+                            {% for b in branches %}
+                            <option value="{{ b.id }}">{{ b.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="parent_member_id">
+                            Parent in Family (Optional)
+                        </label>
+                        <select id="parent_member_id" name="parent_member_id"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm bg-white">
+                            <option value="">-- Select Parent (if registered) --</option>
+                            {% for elder in elders %}
+                            <option value="{{ elder.id }}">{{ elder.full_name }} ({{ elder.role }})</option>
+                            {% endfor %}
+                        </select>
+                        <span class="text-[11px] text-slate-500 block mt-1">Helps build the interactive family tree connection</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Contact Details -->
+            <div class="space-y-4 pt-2">
+                <h3 class="font-heading text-sm font-bold uppercase tracking-wider text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="phone-call" class="w-4 h-4 text-amber-600"></i>
+                    <span>3. Contact & Notification Info</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="email">
+                            Email Address <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="email" id="email" name="email" required placeholder="kwame@example.com"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="phone">
+                            Phone / WhatsApp Number <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="phone" name="phone" required placeholder="+233 24 123 4567"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="residence">
+                            Residence / City, Country
+                        </label>
+                        <input type="text" id="residence" name="residence" placeholder="e.g. Accra, Ghana / London, UK"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="occupation">
+                            Profession / Occupation / School
+                        </label>
+                        <input type="text" id="occupation" name="occupation" placeholder="e.g. Accountant, Student, Teacher"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="bio">
+                        Short Bio / Note to Family
+                    </label>
+                    <textarea id="bio" name="bio" rows="2" placeholder="Tell the family a brief note about yourself..."
+                        class="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm"></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Password Security -->
+            <div class="space-y-4 pt-2">
+                <h3 class="font-heading text-sm font-bold uppercase tracking-wider text-blue-950 border-b border-slate-200 pb-2 flex items-center gap-2">
+                    <i data-lucide="lock" class="w-4 h-4 text-purple-600"></i>
+                    <span>4. Account Security</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="password">
+                            Password <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="password" id="password" name="password" required minlength="6" placeholder="At least 6 characters"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" for="confirm_password">
+                            Confirm Password <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="password" id="confirm_password" name="confirm_password" required minlength="6" placeholder="Repeat password"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welfare Commitment Notice -->
+            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-950 leading-relaxed flex items-start gap-3">
+                <i data-lucide="info" class="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <strong>Welfare & Meeting Commitment:</strong> As a verified member (aged 16+), you commit to attending bi-weekly meetings (or submitting an apology) and contributing regular monthly welfare dues of <strong>GH₵ 50.00</strong> to support family welfare, youth education, and senior health.
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-2">
+                <button type="submit" id="submit-btn" class="w-full py-3.5 px-6 rounded-2xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-base shadow-lg transition flex items-center justify-center gap-2">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                    <span>Complete 16+ Member Registration</span>
+                </button>
+            </div>
+
+            <p class="text-center text-xs text-slate-500">
+                Already registered? <a href="{{ url_for('login') }}" class="font-bold text-blue-700 hover:underline">Log into your portal account</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Real-Time 16+ Age Verification Validator
+    const dobInput = document.getElementById('date_of_birth');
+    const badge = document.getElementById('age-check-badge');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function calculateAgeFromDate(dobString) {
+        if (!dobString) return null;
+        const dob = new Date(dobString);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    dobInput.addEventListener('change', function() {
+        const age = calculateAgeFromDate(this.value);
+        if (age === null || isNaN(age)) {
+            badge.classList.add('hidden');
+            submitBtn.disabled = false;
+            return;
+        }
+
+        badge.classList.remove('hidden');
+
+        if (age < 16) {
+            badge.className = 'p-3.5 rounded-xl text-xs font-semibold bg-rose-50 border border-rose-300 text-rose-900 flex items-start gap-2.5';
+            badge.innerHTML = `
+                <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <span class="font-bold block">Ineligible: Age ${age} Years</span>
+                    Family portal membership registration is strictly restricted to members aged <strong>16 and above</strong>. Dependents under 16 can be listed under their parents' profile in the family tree.
+                </div>
+            `;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            badge.className = 'p-3.5 rounded-xl text-xs font-semibold bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-2.5';
+            badge.innerHTML = `
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+                <div>
+                    <span class="font-bold">Verified: ${age} Years Old!</span>
+                    You meet the age requirement (16+) to register, vote, and participate in The Bigger Family portal.
+                </div>
+            `;
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}

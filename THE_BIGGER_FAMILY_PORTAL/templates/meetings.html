@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Bi-Weekly Meetings | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header Banner -->
+    <div class="rounded-3xl bg-gradient-to-r from-blue-950 via-indigo-950 to-blue-900 text-white p-6 sm:p-8 shadow-xl border border-blue-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold mb-2 border border-blue-400/30">
+                <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                <span>14-Day Recurring Assembly Cycle</span>
+            </div>
+            <h1 class="font-heading text-2xl sm:text-3xl font-extrabold text-white">Bi-Weekly Family Assemblies</h1>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+                Meetings of The Bigger Family are held <strong>every two weeks (14 days)</strong> to discuss family welfare, branch reports, youth empowerment, and upcoming milestones.
+            </p>
+        </div>
+
+        {% if is_admin %}
+        <button type="button" onclick="openNewMeetingModal()" class="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-blue-950 font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-1.5 self-start md:self-auto">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+            <span>Schedule Next Assembly (+14 Days)</span>
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Upcoming Bi-Weekly Assemblies -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-heading text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="calendar-clock" class="w-5 h-5 text-blue-700"></i>
+                <span>Upcoming Assemblies</span>
+            </h2>
+            <span class="text-xs text-slate-500">Every 14 Days</span>
+        </div>
+
+        <div class="space-y-4">
+            {% for m in upcoming %}
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-sm hover:border-blue-300 transition flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div class="flex items-start gap-4 flex-1">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-900 text-white flex flex-col items-center justify-center font-bold shadow-md flex-shrink-0">
+                        <span class="text-[10px] uppercase font-semibold text-amber-300">Cycle</span>
+                        <span class="text-xl font-extrabold leading-tight">#{{ m.cycle_number }}</span>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">
+                                {{ m.meeting_type }}
+                            </span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 uppercase">
+                                {{ m.location_type }}
+                            </span>
+                        </div>
+                        <h3 class="font-heading font-bold text-lg sm:text-xl text-slate-900">{{ m.title }}</h3>
+                        <p class="text-xs text-slate-600 mt-1 flex flex-wrap items-center gap-3">
+                            <span><i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1 text-blue-700"></i><strong>{{ m.scheduled_date }}</strong></span>
+                            <span><i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1 text-blue-700"></i>{{ m.start_time }} - {{ m.end_time }} GMT</span>
+                            <span><i data-lucide="users" class="w-3.5 h-3.5 inline mr-1 text-emerald-700"></i>{{ m.attending_count }} Confirmed Attending</span>
+                        </p>
+                        <p class="text-xs text-slate-500 mt-2 line-clamp-2">{{ m.location_detail }}</p>
+                    </div>
+                </div>
+
+                <!-- RSVP & Actions -->
+                <div class="flex flex-col sm:flex-row lg:flex-col items-end gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <form action="{{ url_for('meeting_rsvp', meeting_id=m.id) }}" method="POST" class="flex items-center gap-1.5">
+                            <button type="submit" name="rsvp_status" value="attending" 
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 {{ 'bg-emerald-600 text-white shadow' if m.rsvp_status == 'attending' else 'bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700' }}">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                <span>Attending</span>
+                            </button>
+                            <button type="submit" name="rsvp_status" value="tentative"
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition {{ 'bg-amber-500 text-white shadow' if m.rsvp_status == 'tentative' else 'bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-700' }}">
+                                Tentative
+                            </button>
+                            <button type="submit" name="rsvp_status" value="absent"
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition {{ 'bg-rose-600 text-white shadow' if m.rsvp_status == 'absent' else 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700' }}">
+                                Apology
+                            </button>
+                        </form>
+                    </div>
+
+                    <a href="{{ url_for('meeting_detail', meeting_id=m.id) }}" class="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1">
+                        <span>View Agenda & Link &rarr;</span>
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-white rounded-2xl p-8 text-center text-slate-400 border border-slate-200">
+                <i data-lucide="calendar" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
+                <p class="text-sm font-semibold">No upcoming meetings scheduled.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Past Meetings & Minutes Archive -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-heading text-xl font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="archive" class="w-5 h-5 text-slate-600"></i>
+                <span>Past Assemblies & Minutes Archive</span>
+            </h2>
+            <span class="text-xs text-slate-500">Documented Decisions</span>
+        </div>
+
+        <div class="space-y-4">
+            {% for p in past %}
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-mono font-bold text-xs text-slate-700">
+                            Assembly #{{ p.cycle_number }}
+                        </span>
+                        <h3 class="font-heading font-bold text-base text-slate-900">{{ p.title }}</h3>
+                    </div>
+                    <span class="text-xs text-slate-500">{{ p.scheduled_date }}</span>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <span class="font-bold text-slate-700 block mb-1">Agenda Summary:</span>
+                        <p class="text-slate-600 whitespace-pre-line bg-slate-50 p-3 rounded-xl border border-slate-100">{{ p.agenda or 'Standard bi-weekly agenda' }}</p>
+                    </div>
+                    <div>
+                        <span class="font-bold text-emerald-800 block mb-1">Minutes & Resolutions Taken:</span>
+                        <p class="text-slate-700 whitespace-pre-line bg-emerald-50/50 p-3 rounded-xl border border-emerald-100 font-mono">{{ p.minutes or 'Minutes under transcription by secretariat.' }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500">Attendance: {{ p.total_attended }} members registered in roll-call</span>
+                    <a href="{{ url_for('meeting_detail', meeting_id=p.id) }}" class="text-blue-700 hover:underline font-bold">
+                        Full Attendance & Minutes &rarr;
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Schedule Next Meeting Modal (Admin) -->
+{% if is_admin %}
+<div id="new-meeting-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+            <h3 class="font-heading font-bold text-lg text-slate-900 flex items-center gap-2">
+                <i data-lucide="calendar-plus" class="w-5 h-5 text-blue-700"></i>
+                <span>Schedule Next Bi-Weekly Assembly</span>
+            </h3>
+            <button type="button" onclick="closeNewMeetingModal()" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('create_meeting') }}" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Meeting Title</label>
+                <input type="text" name="title" required value="Bigger Family Bi-Weekly Assembly"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Meeting Date (Every 14 Days)</label>
+                    <input type="date" id="new-meeting-date" name="scheduled_date" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Meeting Type</label>
+                    <select name="location_type" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <option value="virtual">Virtual (Zoom / Google Meet)</option>
+                        <option value="hybrid">Hybrid (Zoom + Physical)</option>
+                        <option value="physical">Physical Gathering</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Start Time (GMT)</label>
+                    <input type="time" name="start_time" value="16:00" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">End Time (GMT)</label>
+                    <input type="time" name="end_time" value="18:00" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Location Details / Virtual Link</label>
+                <input type="text" name="location_detail" required value="Virtual via Zoom (Passcode: BIGGER2026)"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Agenda Points</label>
+                <textarea name="agenda" rows="3" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono">1. Opening Prayer
+2. Review of Minutes
+3. Branch Reports
+4. Monthly Welfare Fund (GH₵ 50)
+5. AOB & Closing</textarea>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end gap-2">
+                <button type="button" onclick="closeNewMeetingModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow-md transition">
+                    Publish & Notify All Members
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const meetingModal = document.getElementById('new-meeting-modal');
+    function openNewMeetingModal() {
+        // Pre-fill next 14th day
+        const dateInput = document.getElementById('new-meeting-date');
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 14);
+        const yyyy = futureDate.getFullYear();
+        const mm = String(futureDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(futureDate.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+        meetingModal.classList.remove('hidden');
+    }
+    function closeNewMeetingModal() {
+        meetingModal.classList.add('hidden');
+    }
+</script>
+{% endblock %}

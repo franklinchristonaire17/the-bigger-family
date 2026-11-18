@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl text-white font-heading font-extrabold text-2xl flex items-center justify-center shadow-lg" style="background-color: {{ member.branch_color or '#3B82F6' }};">
+                {{ member.full_name[0] }}
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold text-white" style="background-color: {{ member.branch_color or '#3B82F6' }};">
+                        {{ member.branch_name }}
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                        Age {{ member.age }} (16+ Verified)
+                    </span>
+                </div>
+                <h1 class="font-heading text-2xl font-bold text-slate-900">{{ member.full_name }}</h1>
+                <p class="text-xs text-slate-500">{{ member.email }}</p>
+            </div>
+        </div>
+
+        <span class="px-3 py-1.5 rounded-xl bg-slate-100 font-bold text-xs text-slate-700 uppercase tracking-wider self-start sm:self-auto">
+            Role: {{ member.role }}
+        </span>
+    </div>
+
+    <!-- Profile Edit Form -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <h2 class="font-heading text-lg font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100">
+            Profile & Contact Information
+        </h2>
+
+        <form action="{{ url_for('profile') }}" method="POST" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" value="{{ member.full_name }}" disabled
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed">
+                    <span class="text-[10px] text-slate-400 mt-1 block">Contact Secretariat to change legal registry name</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Date of Birth</label>
+                    <input type="text" value="{{ member.date_of_birth }} (Age: {{ member.age }} yrs)" disabled
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed">
+                    <span class="text-[10px] text-emerald-600 font-semibold mt-1 block">Verified 16+ on registration</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone / WhatsApp</label>
+                    <input type="text" name="phone" value="{{ member.phone }}" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Occupation / School</label>
+                    <input type="text" name="occupation" value="{{ member.occupation or '' }}"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Residence (City, Country)</label>
+                    <input type="text" name="residence" value="{{ member.residence or '' }}"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Family Tree Lineage Parent</label>
+                    <input type="text" value="{{ member.parent_name or 'None Recorded' }}" disabled
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 text-sm cursor-not-allowed">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Personal Bio / Family Message</label>
+                <textarea name="bio" rows="3" class="w-full px-4 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600">{{ member.bio or '' }}</textarea>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs shadow transition">
+                    Save Profile Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

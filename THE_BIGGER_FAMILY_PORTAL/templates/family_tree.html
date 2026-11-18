@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Family Tree & Branches | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header & Search -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-1">
+                <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
+                <span>Lineage & Generational Registry (Ages 16+)</span>
+            </div>
+            <h1 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900">The Bigger Family Tree</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Explore our ancestral branches, connect with cousins and elders, and view generational lineages.</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative w-full md:w-80">
+            <input type="text" id="member-search" placeholder="Search by name, city, job..."
+                class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white shadow-sm">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+        </div>
+    </div>
+
+    <!-- Branch Selector Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <button type="button" class="branch-filter active px-4 py-2 rounded-xl text-xs font-bold transition bg-blue-900 text-white shadow-sm" data-branch="all">
+            All Branches ({{ members|length }})
+        </button>
+        {% for b in branches %}
+        <button type="button" class="branch-filter px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 shadow-sm flex items-center gap-2" data-branch="{{ b.name }}">
+            <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ b.color_code }};"></span>
+            <span>{{ b.name }} ({{ b.member_count }})</span>
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Interactive Ancestral Tree Visualization Diagram -->
+    <div class="bg-gradient-to-b from-blue-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-blue-900 overflow-x-auto">
+        <div class="text-center mb-8">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-widest block mb-1">Root of Lineage & Ancestral Seat</span>
+            <div class="inline-block bg-gradient-to-r from-amber-500 to-amber-600 text-blue-950 font-heading font-extrabold text-lg sm:text-xl px-6 py-3 rounded-2xl shadow-xl border-2 border-amber-300">
+                PAPA KWAME BIGGER (ANCESTRAL PATRIARCH)
+            </div>
+            <p class="text-xs text-slate-300 mt-2 font-medium">Headquarters: Adabraka Family House, Accra ("Ataa shi ɛfolo") • Branches: Adabraka, Abossey Okai & Ofankor</p>
+        </div>
+
+        <!-- Connecting Line -->
+        <div class="w-0.5 h-8 bg-amber-400/60 mx-auto"></div>
+
+        <!-- Branch Lineage Tier -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto pt-2">
+            {% for b in branches %}
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15 text-center flex flex-col justify-between hover:bg-white/15 transition">
+                <div>
+                    <div class="w-3 h-3 rounded-full mx-auto mb-2" style="background-color: {{ b.color_code }};"></div>
+                    <h3 class="font-heading font-bold text-sm text-white mb-1">{{ b.name }}</h3>
+                    <p class="text-[11px] text-amber-300 font-medium mb-2">Head: {{ b.leader_name or 'Elders' }}</p>
+                    <p class="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">{{ b.description }}</p>
+                </div>
+                <div class="mt-3 pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400">{{ b.member_count }} Members (16+)</span>
+                    <a href="{{ url_for('branch_detail', branch_id=b.id) }}" class="text-amber-400 hover:underline font-bold">Roster &rarr;</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Generational Member Grid -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-heading text-lg font-bold text-slate-900">Registered Family Members (Aged 16+)</h2>
+            <span class="text-xs text-slate-500">Showing <span id="visible-count">{{ members|length }}</span> members</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="member-cards-container">
+            {% for m in members %}
+            <div class="member-card bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                 data-name="{{ m.full_name|lower }}"
+                 data-branch="{{ m.branch_name }}"
+                 data-city="{{ (m.residence or '')|lower }}"
+                 data-job="{{ (m.occupation or '')|lower }}">
+                
+                <div>
+                    <!-- Member Header -->
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl text-white font-bold text-base flex items-center justify-center shadow-sm" style="background-color: {{ m.branch_color or '#3B82F6' }};">
+                                {{ m.full_name[0] }}
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-base text-slate-900 leading-tight">{{ m.full_name }}</h3>
+                                <span class="text-xs text-slate-500 block mt-0.5">{{ m.occupation or 'Family Member' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style="background-color: {{ m.branch_color or '#3B82F6' }};">
+                            {{ m.branch_name }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            Age {{ m.age }} (16+)
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 uppercase">
+                            {{ m.role }}
+                        </span>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="space-y-1.5 text-xs text-slate-600 bg-slate-50/70 p-3 rounded-xl border border-slate-100">
+                        {% if m.parent_name %}
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="git-commit" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span>Parent: <strong class="text-slate-800">{{ m.parent_name }}</strong></span>
+                        </div>
+                        {% endif %}
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span>{{ m.residence or 'Ghana' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span class="text-[11px] text-slate-400">{{ m.gender }} • Active</span>
+                    <a href="mailto:{{ m.email }}" class="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1">
+                        <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                        <span>Contact</span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Search & Filter JavaScript
+    const searchInput = document.getElementById('member-search');
+    const filterButtons = document.querySelectorAll('.branch-filter');
+    const memberCards = document.querySelectorAll('.member-card');
+    const visibleCount = document.getElementById('visible-count');
+
+    let currentBranch = 'all';
+
+    function filterMembers() {
+        const query = searchInput.value.toLowerCase().trim();
+        let count = 0;
+
+        memberCards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            const branch = card.getAttribute('data-branch');
+            const city = card.getAttribute('data-city');
+            const job = card.getAttribute('data-job');
+
+            const matchesBranch = (currentBranch === 'all' || branch === currentBranch);
+            const matchesQuery = (!query || name.includes(query) || city.includes(query) || job.includes(query));
+
+            if (matchesBranch && matchesQuery) {
+                card.classList.remove('hidden');
+                count++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        visibleCount.textContent = count;
+    }
+
+    searchInput.addEventListener('input', filterMembers);
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterButtons.forEach(b => {
+                b.classList.remove('active', 'bg-blue-900', 'text-white');
+                b.classList.add('bg-white', 'text-slate-700');
+            });
+            this.classList.add('active', 'bg-blue-900', 'text-white');
+            this.classList.remove('bg-white', 'text-slate-700');
+
+            currentBranch = this.getAttribute('data-branch');
+            filterMembers();
+        });
+    });
+</script>
+{% endblock %}

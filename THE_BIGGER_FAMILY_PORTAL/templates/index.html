@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome | The Bigger Family Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-12">
+    <!-- Hero Section -->
+    <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-indigo-950 text-white shadow-2xl p-8 sm:p-12 lg:p-16 border border-blue-800">
+        <!-- Subtle decorative pattern -->
+        <div class="absolute -right-20 -bottom-20 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -top-20 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs sm:text-sm font-semibold mb-6">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span>Headquarters: Adabraka Family House, Accra ("Ataa shi ɛfolo")</span>
+            </div>
+
+            <h1 class="font-heading text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6">
+                One Lineage, Many Branches, <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-200">One Bigger Family</span>
+            </h1>
+
+            <p class="text-base sm:text-lg text-slate-200 leading-relaxed mb-8 max-w-2xl">
+                Uniting our generations across <strong>Adabraka</strong>, <strong>Abossey Okai</strong>, and <strong>Ofankor</strong> branches. Register under your branch (ages 16+), contribute to our monthly welfare dues, and participate in our bi-weekly family assemblies.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4">
+                <a href="{{ url_for('register') }}" class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-blue-950 font-bold px-6 py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
+                    <span>Register as Member (16+)</span>
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                </a>
+                <a href="{{ url_for('login') }}" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold px-6 py-3.5 rounded-2xl transition backdrop-blur-sm">
+                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                    <span>Member Log In</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Stats Strip -->
+        <div class="mt-12 pt-8 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/5">
+                <span class="text-2xl sm:text-3xl font-extrabold text-amber-300 block font-heading">{{ member_count }}+</span>
+                <span class="text-xs text-slate-300">Registered Members (16+)</span>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/5">
+                <span class="text-2xl sm:text-3xl font-extrabold text-white block font-heading">{{ branch_count }}</span>
+                <span class="text-xs text-slate-300">Family Tree Branches</span>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/5">
+                <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 block font-heading">GH₵ 50</span>
+                <span class="text-xs text-slate-300">Monthly Welfare Dues</span>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 backdrop-blur-sm border border-white/5">
+                <span class="text-2xl sm:text-3xl font-extrabold text-blue-300 block font-heading">14 Days</span>
+                <span class="text-xs text-slate-300">Bi-Weekly Assembly Cycle</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Upcoming Assembly Callout -->
+    {% if next_meeting %}
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-600 text-white flex flex-col items-center justify-center font-bold shadow-md flex-shrink-0">
+                <span class="text-xs uppercase leading-none font-semibold">Assembly</span>
+                <span class="text-xl leading-tight font-extrabold">#{{ next_meeting.cycle_number }}</span>
+            </div>
+            <div>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-xs font-semibold mb-1">
+                    <i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i>
+                    <span>Next Bi-Weekly Meeting</span>
+                </div>
+                <h3 class="font-heading font-bold text-xl text-slate-900">{{ next_meeting.title }}</h3>
+                <p class="text-sm text-slate-600 mt-1 flex items-center gap-3">
+                    <span><i data-lucide="clock" class="w-4 h-4 inline mr-1 text-amber-700"></i>{{ next_meeting.scheduled_date }} at {{ next_meeting.start_time }} GMT</span>
+                    <span><i data-lucide="video" class="w-4 h-4 inline mr-1 text-amber-700"></i>Hybrid (Zoom + Physical Compound)</span>
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <a href="{{ url_for('login') }}" class="w-full md:w-auto text-center px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow transition">
+                RSVP Attendance
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Core Pillars / Features -->
+    <div>
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-blue-950">How The Family Portal Works</h2>
+            <p class="text-sm text-slate-600 mt-2">Designed specifically for The Bigger Family governance, financial transparency, and inter-generational fellowship.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Pillar 1: 16+ Registration -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-4">
+                    <i data-lucide="user-check" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-900 mb-2">Aged 16+ Registry</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Strict eligibility validation ensures every member aged 16 and above registers with their date of birth, branch affiliation, and lineage.
+                </p>
+            </div>
+
+            <!-- Pillar 2: Branches of the Tree -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+                    <i data-lucide="git-branch" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-900 mb-2">3 Family Branches</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Interactive visualization grouping all 16+ members under our branches: <strong>Adabraka</strong> (Headquarters), <strong>Abossey Okai</strong>, and <strong>Ofankor</strong>.
+                </p>
+            </div>
+
+            <!-- Pillar 3: Monthly Dues -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
+                    <i data-lucide="receipt" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-900 mb-2">Monthly Dues (GH₵)</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Transparent welfare fund tracking. Submit dues via MTN MoMo, Telecel Cash or Bank, and get official digital payment receipts.
+                </p>
+            </div>
+
+            <!-- Pillar 4: Bi-Weekly Assemblies & Notifications -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4">
+                    <i data-lucide="bell-ring" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-heading font-bold text-lg text-slate-900 mb-2">Bi-Weekly Meetings & Alerts</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Assemblies held every 2 weeks (14 days cycle). In-app alerts notify each member of agendas, dates, Zoom links, and minutes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- The 3 Branches Showcase -->
+    <div class="bg-slate-100 rounded-3xl p-8 border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
+            <div>
+                <h2 class="font-heading font-extrabold text-2xl text-blue-950">Branches of The Bigger Family</h2>
+                <p class="text-xs text-slate-600 mt-1">Headquarters: Adabraka Family House, Accra ("Ataa shi ɛfolo") • All members aged 16+ registered under their branch</p>
+            </div>
+            <a href="{{ url_for('register') }}" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1">
+                <span>Select your branch to join</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {% for b in branches %}
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-3.5 h-3.5 rounded-full" style="background-color: {{ b.color_code }};"></span>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Branch #{{ b.id }}</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-base text-slate-900 mb-1">{{ b.name }}</h3>
+                    <p class="text-xs text-amber-700 font-medium mb-2">Representative: {{ b.leader_name or 'Elders Committee' }}</p>
+                    <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed mb-4">{{ b.description }}</p>
+                </div>
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span class="font-medium">Active Lineage</span>
+                    <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Call to Action Banner -->
+    <div class="rounded-3xl bg-blue-900 text-white p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+        <div>
+            <h3 class="font-heading text-2xl font-bold mb-2">Are you a member of The Bigger Family aged 16 or older?</h3>
+            <p class="text-sm text-blue-200 max-w-xl">
+                Register now to receive meeting notifications every two weeks, participate in our family welfare decisions, and stay united with all branches.
+            </p>
+        </div>
+        <a href="{{ url_for('register') }}" class="whitespace-nowrap px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-blue-950 font-bold text-sm shadow-md transition">
+            Create Your Account (16+)
+        </a>
+    </div>
+</div>
+{% endblock %}
